@@ -11,6 +11,12 @@
 # production
 /build
 
+# Flask
+/api/venv
+/api/tests
+/api/resources/
+!/api/resources/*_filtered.csv
+
 # misc
 .DS_Store
 .env.local
