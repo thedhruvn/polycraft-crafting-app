@@ -6,7 +6,7 @@ import { Base64 } from 'js-base64'
 import mermaid from 'mermaid'
 
 import Error from './Error'
-import Preview from './Preview'
+import Preview from './Preview_Promises'
 import pkg from 'mermaid/package.json'
 import { base64ToState } from '../utils'
 
@@ -24,14 +24,48 @@ class PolyAutoComplete extends React.PureComponent {
         console.log(`Options available: ${this.state.options}`)
     }
 
+    escapeRegExp(string) {
+        return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
+    }
+
     searchResult = (query) => {
         //    console.log(`searching...`)
-        var re = new RegExp(query, 'i')
+        var re = new RegExp(this.escapeRegExp(query), 'i')
         if (this.state.options === null) {
-            return []
+            return [{
+                value: 'No Items Found',
+                label: (
+                    <div
+                        style={{
+                            display: 'block',
+                            justifyContent: 'space-between',
+                        }}
+                    >
+                    <span>No Items Found
+                    </span>
+                </div>
+                ),
+            }];
         }
         var vals = this.state.options.filter( function (v) {return re.test(v)})
         //    console.log(`results length: ${vals.length}`)
+        if (vals.length === 0) {
+            return [{
+                value: "No Items Found",
+                label: (
+                    <div
+                        style={{
+                            display: 'block',
+                            justifyContent: 'space-between',
+                        }}
+                    >
+                    <span>No Items Found
+                    </span>
+                </div>
+                ),
+            }];
+        }
+
         return vals.map((item, idx) => {
         const category = `${query}${idx}`;
         return {
@@ -111,6 +145,7 @@ class Edit extends React.Component {
 
   toggleSpinner = () => {
         this.setState({spinner: !this.state.spinner});
+        console.log("toggleSpin triggered")
     }
 
   get_all_options () {
@@ -155,7 +190,8 @@ class Edit extends React.Component {
               }
             }
         ).then( res => res.json()).then(data => data['data']).then( function(result) {
-
+              that.toggleSpinner()
+              that.forceUpdate()
               const result_final = 
               `graph TD
               ${result}`
@@ -165,7 +201,7 @@ class Edit extends React.Component {
               console.log(JSON.stringify(that.json))
               const base64 = Base64.encodeURI(JSON.stringify(that.json))
               history.push(path.replace(':base64', base64))
-              that.toggleSpinner()
+
           });
   }
 

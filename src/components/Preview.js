@@ -43,6 +43,8 @@ class Preview extends React.Component {
             break;
         case "GEN_MERMAID":
             should_spinner = true;
+            console.log("Mermaid Complete!");
+            this.props.toggleSpin()
 
             break;
         default:
